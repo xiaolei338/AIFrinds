@@ -19,7 +19,7 @@ class RefreshTokenView(APIView):
                     'access': str(refresh.access_token)
                 })
                 response.set_cookie(
-                    key='refresh token',
+                    key='refresh_token',
                     value=str(refresh),
                     httponly=True,
                     samesite='Lax',
