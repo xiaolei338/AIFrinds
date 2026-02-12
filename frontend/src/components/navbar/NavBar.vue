@@ -5,6 +5,10 @@ import HomepageIcon from "@/components/navbar/icons/HomepageIcon.vue";
 import FrindIcon from "@/components/navbar/icons/FrindIcon.vue";
 import CeateIcon from "@/components/navbar/icons/CeateIcon.vue";
 import SearchIcon from "@/components/navbar/icons/SearchIcon.vue";
+import {useUserStore} from "@/stores/user.js";
+import UserMenu from "@/components/navbar/UserMenu.vue";
+
+const user = useUserStore()
 </script>
 
 <template>
@@ -30,9 +34,14 @@ import SearchIcon from "@/components/navbar/icons/SearchIcon.vue";
         </div>
       </div>
       <div class="navbar-end">
-        <RouterLink :to="{name: 'user-account-login-index'}" active-class="btn-active" class="btn btn-ghost text-lg">
+        <RouterLink v-if="user.isLogin()" :to="{name:'create-index'}" active-class="btn-active" class="btn btn-ghost text-base mr-6">
+          <CeateIcon/>
+          创作
+        </RouterLink>
+        <RouterLink v-if="!user.isLogin()" :to="{name: 'user-account-login-index'}" active-class="btn-active" class="btn btn-ghost text-lg">
           登录
         </RouterLink>
+        <UserMenu v-else />
       </div>
     </nav>
     <!-- Page content here -->
