@@ -16,5 +16,5 @@ class RemoveCharacterView(APIView):
             })
         except:
             return Response({
-                'result':'系统异常，请稍后重试',
+                'result': '系统异常，请稍后重试'
             })

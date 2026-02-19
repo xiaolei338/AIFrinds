@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
-                ('photo', models.ImageField(upload_to=web.models.character.photo_to_upload_to)),
+                ('photo', models.ImageField(upload_to=web.models.character.photo_upload_to)),
                 ('profile', models.TextField(max_length=100000)),
                 ('background', models.ImageField(upload_to=web.models.character.background_image_upload_to)),
                 ('create_time', models.DateTimeField(default=django.utils.timezone.now)),

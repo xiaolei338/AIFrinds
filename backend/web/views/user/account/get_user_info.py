@@ -12,13 +12,13 @@ class GetUserInfoView(APIView):
             user = request.user
             user_profile = UserProfile.objects.get(user=user)
             return Response({
-                'result':'success',
-                'user_id':user.id,
-                'username':user.username,
-                'photo':user_profile.photo.url,
-                'profile':user_profile.profile,
+                'result': 'success',
+                'user_id': user.id,
+                'username': user.username,
+                'photo': user_profile.photo.url,
+                'profile': user_profile.profile,
             })
         except:
             return Response({
-                'result': '系统异常，请稍后尝试',
+                'result': '系统异常，请稍后重试'
             })

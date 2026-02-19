@@ -19,7 +19,7 @@ async function handleRegister() {
     errorMessage.value = '用户名不能为空'
   }else if(!password.value.trim()){
     errorMessage.value = '密码不能为空'
-  }else if(password.value.trim() != passwordConfirmed.value.trim()){
+  }else if(password.value.trim() !== passwordConfirmed.value.trim()){
     errorMessage.value = '两次输入密码不一致'
   }else{
     try{

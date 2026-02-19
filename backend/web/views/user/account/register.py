@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from web.models.user import UserProfile
@@ -27,7 +27,7 @@ class RegisterView(APIView):
                 'access': str(refresh.access_token),
                 'user_id': user.id,
                 'username': user.username,
-                'photo': user_profile.photo.url,
+                'photo': user_profile.photo.url,  # 必须加url！！！
                 'profile': user_profile.profile,
             })
             response.set_cookie(
@@ -41,5 +41,5 @@ class RegisterView(APIView):
             return response
         except:
             return Response({
-                'result':'系统异常，请稍后重试'
+                'result': '系统异常，请稍后重试'
             })

@@ -1,6 +1,6 @@
 from django.utils.timezone import now
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from web.models.character import Character
@@ -20,7 +20,7 @@ class UpdateCharacterView(APIView):
 
             if not name:
                 return Response({
-                    'result':'角色不能为空'
+                    'result': "名字不能为空"
                 })
             if not profile:
                 return Response({
@@ -37,9 +37,9 @@ class UpdateCharacterView(APIView):
             character.update_time = now()
             character.save()
             return Response({
-                'result':'success',
+                'result': 'success',
             })
         except:
             return Response({
-                'result':'系统异常，请稍后重试',
+                'result': '系统异常，请稍后重试'
             })
