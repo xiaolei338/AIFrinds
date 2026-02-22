@@ -7,7 +7,7 @@ from web.models.friend import Friend
 
 class GetListFriendView(APIView):
     permission_classes = [IsAuthenticated]
-    def post(self, request):
+    def get(self, request):
         try:
             items_count = int(request.query_params.get('items_count', 0))
             friend_raw = Friend.objects.filter(
