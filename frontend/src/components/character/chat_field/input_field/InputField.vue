@@ -1,46 +1,48 @@
 <script setup>
-
 import SendIcon from "@/components/character/icons/SendIcon.vue";
 import MicIcon from "@/components/character/icons/MicIcon.vue";
 import {ref, useTemplateRef} from "vue";
 import streamApi from "@/js/http/streamApi.js";
 
 const props = defineProps(['friendId'])
+const emit = defineEmits(['pushBackMessage', 'addToLastMessage'])
 const inputRef = useTemplateRef('input-ref')
 const message = ref('')
 let isProcessing = false
 
-function focus(){
+function focus() {
   inputRef.value.focus()
 }
 
-async function handleSend(){
-  if(isProcessing)return
+async function handleSend() {
+  if (isProcessing) return
   isProcessing = true
 
   const content = message.value.trim()
-  if(!content)return
+  if (!content) return
   message.value = ''
 
-  try{
-    await streamApi('api/friend/message/chat/',{
-      body:{
-        friend_id:props.friendId,
-        message:content,
+  emit('pushBackMessage', {role: 'user', content: content, id: crypto.randomUUID()})
+  emit('pushBackMessage', {role: 'ai', content: '', id: crypto.randomUUID()})
+
+  try {
+    await streamApi('/api/friend/message/chat/', {
+      body: {
+        friend_id: props.friendId,
+        message: content,
       },
-      onmessage(data, isDone){
-        if(isDone){
+      onmessage(data, isDone) {
+        if (isDone) {
           isProcessing = false
-        }else if(data.content){
-          console.log(data.content)
+        } else if (data.content) {
+          emit('addToLastMessage', data.content)
         }
       },
-      onerror(err){
+      onerror(err) {
         isProcessing = false
       },
     })
-  }catch (err){
-    console.log(err)
+  } catch (err) {
     isProcessing = false
   }
 }
@@ -53,7 +55,7 @@ defineExpose({
 <template>
   <form @submit.prevent="handleSend" class="absolute bottom-4 left-2 h-12 w-86 flex items-center">
     <input
-        ref = "input-ref"
+        ref="input-ref"
         v-model="message"
         class="input bg-black/30 backdrop-blur-sm text-white text-base w-full h-full rounded-2xl pr-20"
         type="text"
