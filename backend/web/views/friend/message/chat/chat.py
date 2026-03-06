@@ -1,7 +1,7 @@
 import json
 
 from django.http import StreamingHttpResponse
-from langchain_core.messages import HumanMessage, BaseMessageChunk, SystemMessage
+from langchain_core.messages import HumanMessage, BaseMessageChunk, SystemMessage, AIMessage
 from rest_framework.renderers import BaseRenderer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -18,25 +18,28 @@ class SSERenderer(BaseRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return data
 
-def add_system_prompt(state,friend):
+
+def add_system_prompt(state, friend):
     msgs = state['messages']
     system_prompts = SystemPrompt.objects.filter(title='回复').order_by('order_number')
     prompt = ''
     for sp in system_prompts:
-        prompt+=sp.prompt
+        prompt += sp.prompt
     prompt += f'\n【角色性格】\n{friend.character.profile}\n'
+    prompt += f'【长期记忆】\n{friend.memory}\n'
     return {'messages': [SystemMessage(prompt)] + msgs}
 
-def add_recent_prompt(state,friend):
+
+def add_recent_messages(state, friend):
     msgs = state['messages']
     message_raw = list(Message.objects.filter(friend=friend).order_by('-id')[:10])
     message_raw.reverse()
     messages = []
     for m in message_raw:
         messages.append(HumanMessage(m.user_message))
-        from langchain_core.messages import AIMessage
         messages.append(AIMessage(m.output))
-    return {'messages': msgs[:1] + messages + msgs[:-1]}
+    return {'messages': msgs[:1] + messages + msgs[-1:]}
+
 
 class MessageChatView(APIView):
     permission_classes = [IsAuthenticated]
@@ -46,22 +49,21 @@ class MessageChatView(APIView):
         message = request.data['message'].strip()
         if not message:
             return Response({
-                'result': '消息不能为空',
+                'result': '消息不能为空'
             })
         friends = Friend.objects.filter(pk=friend_id, me__user=request.user)
-        if not friends:
+        if not friends.exists():
             return Response({
-                'result': '好友不存在',
+                'result': '好友不存在'
             })
         friend = friends.first()
         app = ChatGraph.create_app()
 
         inputs = {
-            'messages': [HumanMessage(message)],
+            'messages': [HumanMessage(message)]
         }
         inputs = add_system_prompt(inputs, friend)
-        inputs = add_recent_prompt(inputs, friend)
-
+        inputs = add_recent_messages(inputs, friend)
 
         def event_stream():
             full_output = ''
@@ -70,10 +72,10 @@ class MessageChatView(APIView):
                 if isinstance(msg, BaseMessageChunk):
                     if msg.content:
                         full_output += msg.content
-                        yield f"data: {json.dumps({'content': msg.content}, ensure_ascii=False)}\n\n"
+                        yield f'data: {json.dumps({'content': msg.content}, ensure_ascii=False)}\n\n'
                     if hasattr(msg, 'usage_metadata') and msg.usage_metadata:
                         full_usage = msg.usage_metadata
-            yield "data: [DONE]\n\n"
+            yield 'data: [DONE]\n\n'
             input_tokens = full_usage.get('input_tokens', 0)
             output_tokens = full_usage.get('output_tokens', 0)
             total_tokens = full_usage.get('total_tokens', 0)
@@ -92,6 +94,6 @@ class MessageChatView(APIView):
             if Message.objects.filter(friend=friend).count() % 1 == 0:
                 update_memory(friend)
 
-        response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
+        response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         return response
