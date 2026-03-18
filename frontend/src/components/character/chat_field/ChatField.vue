@@ -44,7 +44,7 @@ function handlePushFrontMessage(msg) {
   history.value.unshift(msg)
 }
 
-function handleClose(){
+function handleClose() {
   modalRef.value.close()
   inputRef.value.close()
 }
