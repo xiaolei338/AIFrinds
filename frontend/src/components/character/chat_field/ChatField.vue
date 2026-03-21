@@ -45,7 +45,6 @@ function handlePushFrontMessage(msg) {
 }
 
 function handleClose() {
-
   inputRef.value.close()
 }
 
